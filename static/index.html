@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Dot Server</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+
+<body>
+  <div id="root">
+    <header>
+      <h1>dot server</h1>
+    </header>
+    <main>
+      <section>
+        <div>
+          <form v-on:submit.prevent="renderDot">
+            <label for="dot">INPUT</label>
+            <textarea id="dot" v-model="render.dot" placeholder="digraph G {}"></textarea>
+            <button type="submit">RENDER</button>
+          </form>
+        </div>
+      </section>
+      <section>
+        <p>Here is the result:</p>
+        <div id="dot-response">
+          <img v-bind:src="result">
+        </div>
+      </section>
+    </main>
+  </div>
+  <script>
+    const dot = new Vue({
+      el: '#root',
+      data: {
+        render: { dot: '' },
+        result: 'result shown here'
+      },
+      methods: {
+        renderDot: function (event) {
+          axios({
+            method: 'post',
+            url: '/render',
+            data: {
+              dot: this.render.dot
+            },
+            responseType: 'arraybuffer',
+            headers: {
+              'Content-Type': 'image/png'
+            }
+          }).then(res => {
+            const blob = new Blob([res.data], { type: 'image/png' })
+            const url = window.URL || window.webkitURL;
+            this.result = url.createObjectURL(blob);
+          }).catch(err => console.log(err))
+        }
+      }
+    })
+  </script>
+</body>
+
+</html>
